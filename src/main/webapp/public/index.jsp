@@ -4,14 +4,14 @@
     <title>vibeSoul</title>
 </head>
 <body>
-
+<div>
 <!-- Navbar -->
 <%@ include file="navbar.jsp" %>
-
+</div>
 <hr>
-
+<div style="width:100%; margin-top:0px;">
 <%
-    String mid = request.getParameter("page");
+    String mid = request.getParameter("mid");
     if(mid == null) {
         mid = "home"; // default page
     }
@@ -31,5 +31,6 @@
     }
 %>
 
+</div>
 </body>
 </html>

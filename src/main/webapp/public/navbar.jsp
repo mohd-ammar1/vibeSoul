@@ -614,22 +614,22 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Animated Logo -->
                 <div class="flex-shrink-0">
-                    <h1 class="text-2xl font-bold logo">UltraNav</h1>
+                    <h1 class="text-2xl font-bold logo">vibeSoul</h1>
                 </div>
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="#home" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" style="animation-delay: 0.1s">Home</a>
+                        <a href="index.jsp?mid=home" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" style="animation-delay: 0.1s">Home</a>
                         <a href="#about" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" style="animation-delay: 0.2s">About</a>
                         <a href="#contact" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" style="animation-delay: 0.4s">Contact</a>
-                    <a href="#portfolio" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" style="animation-delay: 0.5s">Login</a>
+                    <a href="index.jsp?mid=login" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" style="animation-delay: 0.5s">Login</a>
                     </div>
                 </div>
 
                 <!-- Animated CTA Button -->
                 <div class="hidden md:block">
-                    <button class="cta-button text-white px-6 py-2 rounded-full text-sm font-medium">
+                    <button class="cta-button text-white px-6 py-2 rounded-full text-sm font-medium" onclick="window.location.href='index.jsp?mid=signup'">
                         Get Started
                     </button>
                 </div>
