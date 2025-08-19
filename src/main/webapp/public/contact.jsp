@@ -1,4 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    String insert = request.getParameter("insert");
+    if(insert != null && !insert.isEmpty()){
+        if(insert.equals("true")){
+            out.println("<script>alert('Thankyou for contacting with us')</script>");
+        }else if(insert.equals("false")){
+            out.println("<script>alert('Sorry can't insert your message inserted Successfully')</script>");
+        }
+    }
+
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -131,7 +143,7 @@
     <h2 style="font-weight: 600;">📩 Contact Us</h2>
 
     <div class="row">
-        <!-- Contact Form -->
+            <!-- Contact Form -->
         <div class="col-md-6 animate__animated animate__fadeInLeft">
             <form action="contactServlet" method="post">
                 <input type="text" name="name" class="form-control" placeholder="Your Name" required>

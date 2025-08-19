@@ -1,1 +1,2 @@
-contactServlet.class
+com\main\servlets\contactServlet.class
+com\main\servlets\Dbhandler.class

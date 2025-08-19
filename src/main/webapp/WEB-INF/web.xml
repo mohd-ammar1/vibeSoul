@@ -4,13 +4,10 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
-  <welcome-file-list>
-<welcome-file>public/home.jsp</welcome-file>
-</welcome-file-list>
 
 <context-param>
-  <param-name>url</param-name>
-  <param-value>jdbc:mysql://localhost:3306/</param-value>
+  <param-name>dburl</param-name>
+  <param-value>jdbc:mysql://localhost:3306/vibeSoul_db</param-value>
 </context-param>
 <context-param>
   <param-name>dbusername</param-name>
@@ -20,4 +17,8 @@
   <param-name>dbpass</param-name>
   <param-value>Lucifer</param-value>
 </context-param>
+
+  <welcome-file-list>
+<welcome-file>public/home.jsp</welcome-file>
+</welcome-file-list>
 </web-app>
