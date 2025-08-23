@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 public class Dbhandler {
     private ServletContext context;
     private String dbUrl;
-    private String dbUser;
+    private String dbUser = null;
     private String dbPass;
 
     public Dbhandler(ServletContext context) {
@@ -21,12 +21,13 @@ public class Dbhandler {
 
     public Connection concreater() {
         try {
+             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection con = DriverManager.getConnection(dbUrl, dbUser, dbPass);
             return con;
-        } catch (SQLException exp) {
+        } catch (Exception exp) {
             System.out.println("Error while getting connection: " + exp.getMessage());
-        }
         return null;
+        }
     }
 
     public boolean insertData(String query, Object... params) {

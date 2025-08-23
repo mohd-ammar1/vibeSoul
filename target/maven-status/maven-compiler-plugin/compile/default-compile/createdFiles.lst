@@ -1,2 +1,9 @@
+com\main\servlets\authhandlers\otpHandler.class
+com\main\servlets\authhandlers\mailHandler.class
+com\main\servlets\authhandlers\LogoutServlet.class
+com\main\servlets\authhandlers\mailHandler$1.class
+com\main\servlets\authhandlers\loginHandler.class
+com\main\servlets\authhandlers\Availcheck.class
+com\main\servlets\authhandlers\SignupServlet.class
 com\main\servlets\contactServlet.class
 com\main\servlets\Dbhandler.class

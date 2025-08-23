@@ -1,4 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="jakarta.servlet.http.Cookie"%>
+<%String susername = "";
+
+    Cookie[] cookies = request.getCookies();
+    if(cookies != null){
+
+    for(Cookie c: cookies){
+        if(c.getName().equals("username")){
+            susername = c.getValue();
+        }
+     }
+    }
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -101,7 +115,45 @@
             50% { transform: translateX(40px); }
             100% { bottom: 110%; transform: translateX(-40px); }
         }
+
+         #toast {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                max-width: 280px;
+                padding: 14px 18px;
+                border-radius: 18px;
+                font-size: 15px;
+                font-weight: 500;
+                color: white;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+                animation: fadeInUp 0.5s ease;
+            }
+            #toast.success { background: #4CAF50; }   /* Green for success */
+            #toast.error { background: #E53935; }     /* Red for error */
+            #toast.greet { background: #2196F3; }     /* Blue for greetings */
+
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
     </style>
+    <script>
+            function showToast(msg, type) {
+                const toast = document.getElementById("toast");
+                toast.innerText = msg;
+                toast.className = ""; // reset
+                toast.classList.add(type);
+                toast.style.display = "block";
+
+                setTimeout(() => {
+                    toast.style.display = "none";
+                }, 3000);
+            }
+            
+        </script>
+
 </head>
 <body>
 <!-- Navbar -->
@@ -118,18 +170,29 @@
 <div class="content">
     <div class="login-card animate__animated animate__fadeInDown">
         <h2>Welcome Back</h2>
-        <form action="loginServlet" method="post">
-            <input type="text" name="username" class="form-control" placeholder="Username" required>
+        <form action="<%= request.getContextPath() %>/loginhandler" method="post">
+            <input type="text" name="username" class="form-control" placeholder="Username" value="<%= susername%>" required>
             <input type="password" name="password" class="form-control" placeholder="Password" required>
+            <input type="checkbox" value="remember" name="remme" id="remme"/><label for="remme"> Remember Me</label>
             <button type="submit" class="btn btn-custom">Login</button>
         </form>
         <p class="text-center mt-3 text-white">
             Don’t have an account? <a href="signup.jsp" class="text-light fw-bold">Sign Up</a>
         </p>
     </div>
-</div>
-
+</div>  
+<div id="toast"></div>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+<%
+    String user = request.getParameter("user");
+    if(user != null && !user.equals("")){
+        if(user.equals("unverified")){
+                    out.println("<script>showToast('The username or password you entered is incorrect. Please try again.','error')</script>");
+        }else if(user.equals("unknown")){
+                    out.println("<script>showToast('No account found associated with this email address. Please register first.','error')</script>");
+        }
+    }
+%>

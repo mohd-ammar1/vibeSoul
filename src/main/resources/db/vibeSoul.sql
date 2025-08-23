@@ -14,4 +14,10 @@ VALUES (
         "testing",
         "This is only for testing so dont mind"
     )
+select * from contact;
 
+CREATE TABLE IF NOT EXISTS users(id BIGINT PRIMARY key AUTO_INCREMENT ,email VARCHAR(70) unique NOT NULL , username VARCHAR(50) unique NOT NULL, passhash varchar(100) NOT NULL , type varchar(10)  NOT NULL DEFAULT 'user');  
+DESCRIBE  users;
+SELECT * from users;
+TRUNCATE table users;
+drop table users;

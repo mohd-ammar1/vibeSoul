@@ -1,15 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String insert = request.getParameter("insert");
-    if(insert != null && !insert.isEmpty()){
-        if(insert.equals("true")){
-            out.println("<script>alert('Thankyou for contacting with us')</script>");
-        }else if(insert.equals("false")){
-            out.println("<script>alert('Sorry can't insert your message inserted Successfully')</script>");
-        }
-    }
-
-%>
+%> 
 
 <!DOCTYPE html>
 <html>
@@ -145,7 +137,7 @@
     <div class="row">
             <!-- Contact Form -->
         <div class="col-md-6 animate__animated animate__fadeInLeft">
-            <form action="contactServlet" method="post">
+            <form action="/vibeSoul/contactServlet" method="post">
                 <input type="text" name="name" class="form-control" placeholder="Your Name" required>
                 <input type="email" name="email" class="form-control" placeholder="Your Email" required>
                 <input type="text" name="subject" class="form-control" placeholder="Subject" required>
@@ -172,9 +164,36 @@
                 <a href="#"><i class="bi bi-twitter"></i></a>
                 <a href="#"><i class="bi bi-linkedin"></i></a>
             </div>
+             <div  id="smsg" class="bg-green-200 text-green-800 p-3 rounded-lg shadow-md" style="display:none; margin-top:20px;">
+    Data inserted successfully!
+</div>
+<div id="fmsg" class="bg-red-200 text-red-800 p-3 rounded-lg shadow-md" style="display:none; margin-top:20px;" >
+    Failed to insert data.
+</div>
         </div>
     </div>
 </div>
+<script>
+const insert = "<%=insert%>";
+if(insert !== null && insert !==""){
+  let smsg = document.getElementById("smsg");
+  let fmsg = document.getElementById("fmsg");
+if(insert == "true"){
+    smsg.style.display = "block";
+   setTimeout(() => {
+    smsg.style.transition = "opacity 0.5s";
+    smsg.style.opacity = "0";
+    setTimeout(() => smsg.style.display = "none", 500);
+}, 3000);
+}else if(insert == "false"){
+    fmsg.style.display = "block";
+setTimeout(() => {
+    fmsg.style.transition = "opacity 0.5s";
+    fmsg.style.opacity = "0";
+    setTimeout(() => fmsg.style.display = "none", 500);
+}, 3000);}
+}
+</script>
 
 <!-- Bootstrap Icons + JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
