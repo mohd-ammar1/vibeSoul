@@ -228,7 +228,7 @@
                     <p id ="mailmsg"></p>
                     
                     <!-- OTP Section -->
-                    <div class="otp-container" id="otpContainer">
+                    <div class="otp-container" id="otpContainer" style="display:none;">
                         <input type="text" class="otp-input" id="otp1" maxlength="1" oninput="moveToNext(this, 2)">
                         <input type="text" class="otp-input" id="otp2" maxlength="1" oninput="moveToNext(this, 3)">
                         <input type="text" class="otp-input" id="otp3" maxlength="1" oninput="moveToNext(this, 4)">
@@ -427,6 +427,9 @@
                 startTimer();
                 showToast("OTP sent to your email", "success");
                 
+                
+                document.getElementById("otpContainer").style.display = "flex";
+
                 //AJAX call to your server here
                 
                 const xhr = new XMLHttpRequest();
@@ -522,6 +525,7 @@
                     otpmsg.style.display = "block";
                      otpmsg.className = "success-msg";
                      otpmsg.innerHTML = xhr.responseText;
+                     document.getElementById("otpContainer").style.display = "none";
                 }else{
                 otpmsg.style.display = "block";
                      otpmsg.className = "error-msg";

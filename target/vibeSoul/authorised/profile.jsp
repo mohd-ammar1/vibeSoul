@@ -213,7 +213,7 @@
 </head>
 <body>
     <!-- Include authorized navigation bar -->
-    <%@ include file="auth-navbar.jsp" %>
+  <!--    <include file="navbar.jsp" %> -->
     
     <div class="container main-content">
         <!-- Profile Header -->

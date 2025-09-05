@@ -1,108 +1,51 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%
+    String username = (String) session.getAttribute("username");
+    if (username == null) {
+        username = "Guest" + System.currentTimeMillis();
+    }
+%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0; padding: 0;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 24px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        nav ul {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            gap: 20px;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-        }
-        .chat-section {
-            margin-top: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-        .chat-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 16px;
-        }
-        #chatInput {
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            resize: vertical;
-        }
-        #sendMessageButton, #leaveChatButton {
-            padding: 8px 16px;
-            border: none;
-            background: #007bff;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 8px;
-        }
-        #leaveChatButton {
-            background: #dc3545;
-        }
-        form {
-            margin-top: 24px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VibeSoul Chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="text/javascript">
+    // expose username for script.js
+    window.username = "<%= username %>";
+</script>
+<script type="text/javascript" src="script.js"></script>
+<script type="text/javascript" src="encryption.js"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <nav>
-                <ul>
-                    <li><a href="#">Online</a></li>
-                    <li><a href="#">Chats</a></li>
-                    <li><a href="#">Groups</a></li>
-                </ul>
-            </nav>
-            <div>
-                <%
-                    String user = (String) session.getAttribute("username");
-                %>
-                <c:if test="${not empty user}">
-                    Welcome, <strong>${user}</strong>!
-                </c:if>
-            </div>
-        </div>
+<body class="h-screen flex">
 
-        <div class="chat-section">
-            <div class="chat-info">
-                <strong>Current Chat:</strong> <span id="currentChat">General</span>
-                <button id="leaveChatButton">Leave Chat</button>
-                <span id="chatStatus">Active</span>
-                <span id="chatParticipants">5 participants</span>
-            </div>
-            <textarea id="chatInput" rows="4" cols="50" placeholder="Type your message..."></textarea>
-            <button id="sendMessageButton">Send</button>
-        </div>
+<!-- Sidebar -->
+<div class="w-1/4 bg-gray-100 flex flex-col">
+  <!-- Navbar for tabs -->
+  <div class="flex justify-around p-2 border-b border-gray-300">
+    <button id="onlineTab" class="px-2 py-1 bg-indigo-200 rounded">Online</button>
+    <button id="friendsTab" class="px-2 py-1 hover:bg-indigo-100 rounded">Friends</button>
+  </div>
+  <!-- Content for users -->
+  <div id="sidebarContent" class="flex-1 overflow-y-auto p-2">
+    <!-- Users will appear here -->
+  </div>
+</div>
 
-        <form action="#" method="post">
-            <!-- Form fields -->
-        </form>
-    </div>
+<!-- Chat area -->
+<div class="w-3/4 flex flex-col">
+  <!-- Chat header -->
+  <div id="chatHeader" class="p-4 border-b border-gray-300 font-bold text-lg">Select a user to chat</div>
+  <!-- Chat messages -->
+  <div id="chatLog" class="flex-1 p-4 overflow-y-auto space-y-2 bg-white"></div>
+  <!-- Message input -->
+  <div class="p-4 border-t border-gray-300 flex">
+    <input id="message" type="text" placeholder="Type a message..." class="flex-1 p-2 border rounded-l">
+    <button onclick="sendMessage(currentChatUser)" class="p-2 bg-indigo-500 text-white rounded-r">Send</button>
+  </div>
+</div>
+
 </body>
 </html>

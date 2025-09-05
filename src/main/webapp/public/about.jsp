@@ -36,24 +36,26 @@
         }
 
         /* Typing heading */
-        .typing-text {
-            font-size: 3rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            border-right: 4px solid #fff;
-            width: 0;
-            margin: 0 auto;
-            animation: typing 4s steps(30) forwards, blink 0.6s infinite;
-        }
+       .typing-text {
+    font-size: 3rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 4px solid #fff;
+    width: 0;
+    margin: 0 auto;
+    animation: typing 4s steps(30) forwards, blink 0.6s 1 forwards; /* blink runs only once */
+}
 
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    0%, 50% { border-color: #fff; } /* visible while blinking */
+    100% { border-color: transparent; } /* hide completely at the end */
+}
 
         /* Card styling */
         .about-card {
@@ -234,7 +236,7 @@
     <div class="cta animate__animated animate__fadeInUp">
         <h2>Join vibeSoul today 🎉</h2>
         <p>Be a part of our growing community and start vibing with people around the globe.</p>
-        <a href="index.jsp?mid=signup" class="btn btn-light btn-lg mt-3">Get Started</a>
+        <a href="signup.jsp" class="btn btn-light btn-lg mt-3">Get Started</a>
     </div>
 </div>
 
