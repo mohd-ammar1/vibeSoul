@@ -25,4 +25,4 @@ id_ed25519
 *.pem
 
 # VS Code
-.vscode/
+.vscode/.classpath
