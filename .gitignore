@@ -1,1 +1,28 @@
-/target/
+# Maven
+target/
+
+# Eclipse
+.settings/
+.project
+.classpath
+bin/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# SSH keys
+id_rsa
+id_ed25519
+*.key
+*.pem
+
+# VS Code
+.vscode/
