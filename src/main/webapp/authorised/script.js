@@ -3,10 +3,6 @@ let ws;
 let currentChatUser = null;
 let chats = {};
 
-
-
-
-
 // ===================
 // Fecthing current user id
 // ===================
@@ -24,6 +20,138 @@ fetch(`${window.location.origin}/vibeSoul/Fetchelper`,{
 });
 
 // ===================
+// Fetching Friend List
+// ===================
+function loadFriendList() {
+    return fetch(`${window.location.origin}/vibeSoul/userlist`, { method: "POST", headers: { "Content-Type": "application/json" }})
+    .then(response => {
+        if (!response.ok) throw new Error("Failed to fetch friends");
+        return response.json();
+    })
+    .then(friends => {
+        console.log("Friend list fetched:", friends);
+        renderFriendList(friends);
+        return friends;
+    })
+    .catch(err => console.error("Error loading friends:", err));
+}
+
+// =================
+// Render friend list in sidebar
+// =================
+
+function safeId(name) {
+    return name.replace(/\s+/g, "_").replace(/[^\w-]/g, "");
+}
+
+function renderFriendList(friends) {
+    const sidebar = document.getElementById("friendsContent");
+
+    if (!sidebar) {
+        console.error("Error: friendsContent element not found in DOM!");
+        return;
+    }
+
+    sidebar.innerHTML = ""; // Clear previous list
+
+    if (!friends || friends.length === 0) {
+        sidebar.innerHTML = `<p class="text-muted text-center">No friends found</p>`;
+        return;
+    }
+
+    friends.forEach(friend => {
+        // Create button for each friend
+        const btn = document.createElement("button");
+        btn.className = "w-100 text-start p-2 list-group-item d-flex align-items-center";
+		btn.id = `friend-${safeId(friend)}`;
+        // Create the status indicator circle
+        const statusCircle = document.createElement("span");
+        statusCircle.className = "status-circle status-unknown me-2";
+        statusCircle.id = `status-${safeId(friend)}`;
+
+        // Create the friend name text
+        const friendName = document.createElement("span");
+        friendName.textContent = friend;
+
+        // Append circle and name to button
+        btn.appendChild(statusCircle);
+        btn.appendChild(friendName);
+
+        // Handle friend selection
+        btn.onclick = () => {
+            document.querySelectorAll("#friendsContent button").forEach(b => {
+                b.classList.remove("border-2", "border-primary");
+            });
+            btn.classList.add("border-2", "border-primary");
+            openChat(friend);
+        };
+
+        sidebar.appendChild(btn);
+
+        // Immediately check and update friend's online status
+        checkOnlineStatus(friend);
+    });
+}
+
+
+setInterval(() => {
+    document.querySelectorAll("#friendsContent button").forEach(btn => {
+        const friendName = btn.querySelector("span:not(.status-circle)").textContent;
+        checkOnlineStatus(friendName);
+    });
+}, 5000);
+
+
+
+
+// Load friends automatically when page loads
+window.addEventListener("load", loadFriendList);
+
+
+// ===================
+// Friend Status
+// ===================
+
+function checkOnlineStatus(friendName) {
+    fetch(`${window.location.origin}/vibeSoul/statushandler`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'username=' + encodeURIComponent(friendName)
+    })
+    .then(res => res.json())
+    .then(data => {
+        const circle = document.getElementById(`status-${safeId(friendName)}`);
+        if (!circle) return;
+
+        if (data.success) {
+            if (data.status === 'online') {
+                circle.classList.remove("status-unknown", "status-offline");
+                circle.classList.add("status-online"); // Online = green
+            } else {
+                circle.classList.remove("status-unknown", "status-online");
+                circle.classList.add("status-offline"); // Offline = red
+            }
+        } else {
+            circle.classList.remove("status-online", "status-offline");
+            circle.classList.add("status-unknown"); // Unknown status
+        }
+    })
+    .catch(err => {
+        console.error("Status check failed:", err);
+
+        const circle = document.getElementById(`status-${safeId(friendName)}`);
+        if (circle) {
+            circle.classList.remove("status-online", "status-offline");
+            circle.classList.add("status-unknown"); // Show unknown on error
+        }
+    });
+}
+
+
+
+
+
+// ===================
 // WebSocket connect
 // ===================
 function connect() {
@@ -32,35 +160,38 @@ function connect() {
     ws.onopen = function() {
         console.log("Connected as:", username);
     };
-
-    ws.onmessage = function(event) {
-        let data;
-        try {
-            data = JSON.parse(event.data);
-        } catch (e) {
-            console.error("Invalid message format:", event.data);
-            return;
-        }
-
-        if (data.type === "onlinelist") {
-            renderUserList(data.onlineUsers.filter(u => u !== username)); // exclude yourself
-        } else if (data.type === "message") {
-            // decrypt incoming
-            fetch(`${window.location.origin}/vibeSoul/encryptioncontroll`, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `action=decrypt&sender=${username}&receiver=${data.from}&message=${encodeURIComponent(data.text)}`
-            })
-            .then(response => response.json())
-            .then(result => {
-                let decryptedText = result.result;
-                if (!chats[data.from]) chats[data.from] = [];
-                chats[data.from].push({ sender: data.from, text: decryptedText, time: new Date().toISOString() });
-                if (currentChatUser === data.from) renderChat(data.from);
-            })
-            .catch(err => console.error("Decrypt error:", err));
-        }
-    };
+	ws.onmessage = function(event) {
+	    let data = JSON.parse(event.data);
+	    console.log("WebSocket message received:", data); // For debugging
+	    
+	    if (data.type === "message") {
+	        fetch(`${window.location.origin}/vibeSoul/encryptioncontroll`, {
+	            method: "POST",
+	            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+	            body: `action=decrypt&sender=${data.from}&receiver=${username}&message=${encodeURIComponent(data.text)}`
+	        })
+	        .then(res => res.json())
+	        .then(result => {
+	            let decryptedText = result.result;
+	            unreadmsg();
+	            // Make sure chat array exists
+	            if (!chats[data.from]) chats[data.from] = [];
+	            chats[data.from].push({ sender: data.from, text: decryptedText, time: new Date().toISOString() });
+	          
+	            // Render only if the chat is open
+	            if (currentChatUser === data.from) renderChat(data.from);
+	        });
+	    } 
+	    else if (data.type === "onlinelist") {
+	        // Handle online users list from server
+			const otherUsers = data.onlineUsers.filter(user => user !== username);
+	        console.log("Online users received:", otherUsers);
+	        renderUserList(otherUsers); // This will populate the online tab
+	    }
+	    else {
+	        console.log("Other WebSocket message type:", data.type);
+	    }
+	};
 
     ws.onerror = function(error) {
         console.error("WebSocket error:", error);
@@ -113,70 +244,73 @@ function sendMessage(toUser) {
 }
 
 // show list of users
-// show list of users
 function renderUserList(users) {
-    const sidebar = document.getElementById("sidebarContent");
+    const sidebar = document.getElementById("onlineUsersContent");
     sidebar.innerHTML = "";
+	
+
+    if (!users || users.length === 0) {
+        sidebar.innerHTML = `<p class="text-muted text-center">No online users</p>`;
+        return;
+    }
+
     users.forEach(user => {
         const btn = document.createElement("button");
         btn.textContent = user;
-        btn.className = "w-full text-left p-2 hover:bg-indigo-100 rounded-lg";
+        btn.className = "w-100 text-start p-2 list-group-item";
         btn.onclick = () => {
-            document.querySelectorAll("#sidebarContent button").forEach(b => {
-                b.classList.remove("border-2", "border-indigo-500");
+            document.querySelectorAll("#onlineUsersContent button").forEach(b => {
+                b.classList.remove("border-2", "border-primary");
             });
-            btn.classList.add("border-2", "border-indigo-500");
+            btn.classList.add("border-2", "border-primary");
             openChat(user);
         };
-       sidebar.appendChild(btn);
+        sidebar.appendChild(btn);
     });
 }
-
+// ==============
 // open chat with user
+// ==============
+
 function openChat(user) {
     currentChatUser = user;
+    checkOnlineStatus(user);
+    document.getElementById("chatTitle").textContent = "Chat with " + user;
 
-    // Initialize the chat array if it doesn't exist
-    if (!chats[user]) chats[user] = [];
-
-    document.getElementById("chatHeader").textContent = "Chat with " + user;
+     chats[user] = [];
 
     // Fetch old messages from backend
     fetch(`${window.location.origin}/vibeSoul/Msghandler`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            sender: username,   // logged-in user
-            receiver: user      // the user you are chatting with
+            sender: username,
+            receiver: user
         })
     })
     .then(response => response.json())
     .then(data => {
-        // Map backend messages to match local format
-        const backendMessages = data.map(msg => ({
+       
+		 chats[user] = data.map(msg => ({
             sender: msg.sender_id === window.currentUserId ? "You" : user,
             text: msg.msgText,
             time: msg.sent_at
         }));
 
-        // Merge local messages (already sent) with backend messages
-        // Avoid duplicates by checking timestamp and text
-        const combinedMessages = [...chats[user]]; // local messages
-        backendMessages.forEach(bMsg => {
-            const exists = combinedMessages.some(lMsg => lMsg.text === bMsg.text && lMsg.time === bMsg.time);
-            if (!exists) combinedMessages.push(bMsg);
-        });
+        // Sort by time
+        chats[user].sort((a, b) => new Date(a.time) - new Date(b.time));
 
-        // Sort all messages by time (oldest first)
-        combinedMessages.sort((a, b) => new Date(a.time) - new Date(b.time));
-
-        // Update chats[user] with merged messages
-        chats[user] = combinedMessages;
-
-        // Render the chat
         renderChat(user);
+        readmessage();
     })
     .catch(err => console.error("Error fetching chat:", err));
+
+    // Mobile experience
+    if (window.innerWidth <= 768) {
+        document.getElementById("sidebar").classList.remove("show");
+        const overlay = document.getElementById("sidebarOverlay");
+        if (overlay) overlay.style.display = "none";
+    }
 }
 
 
@@ -221,7 +355,8 @@ function renderChat(user) {
 
         // Create message bubble
         const bubble = document.createElement("div");
-        bubble.classList.add("px-3", "py-2", "rounded-3", "max-w-75", "position-relative");
+        bubble.classList.add("px-3", "py-2", "rounded-3");
+        bubble.style.maxWidth = "75%";
         bubble.style.wordWrap = "break-word";
         bubble.style.animation = "fadeSlide 0.3s";
 
@@ -253,16 +388,138 @@ function renderChat(user) {
     chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// Add fadeSlide animation (can be placed in <style> or your CSS)
+// Add fadeSlide animation
 const style = document.createElement('style');
 style.innerHTML = `
 @keyframes fadeSlide {
     0% { opacity: 0; transform: translateY(10px); }
     100% { opacity: 1; transform: translateY(0); }
 }
+.status-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.status-online {
+    background-color: #28a745;
+}
+.status-offline {
+    background-color: #dc3545;
+}
+.status-unknown {
+    background-color: #6c757d;
+}
 `;
 document.head.appendChild(style);
 
+window.showTab = function (tab) {
+    const onlineTab = document.getElementById("online-tab");
+    const friendsTab = document.getElementById("friends-tab");
+
+    const onlineSection = document.getElementById("onlineUsersSection");
+    const friendsSection = document.getElementById("friendsSection");
+
+    if (tab === 'online') {
+        onlineTab.classList.add("active");
+        friendsTab.classList.remove("active");
+
+        onlineSection.classList.remove("d-none");
+        friendsSection.classList.add("d-none");
+    } else {
+        friendsTab.classList.add("active");
+        onlineTab.classList.remove("active");
+
+        friendsSection.classList.remove("d-none");
+        onlineSection.classList.add("d-none");
+    }
+}
+function switchToBackButton() {
+    const toggleBtn = document.getElementById("toggleBtn");
+    toggleBtn.textContent = "← Back";
+    toggleBtn.onclick = () => {
+        document.getElementById("sidebar").classList.add("show");
+        const overlay = document.getElementById("sidebarOverlay");
+        if (overlay) overlay.style.display = "block";
+
+        // Reset back to "☰ Users"
+        resetToUsersButton();
+    };
+}
+
+function resetToUsersButton() {
+    const toggleBtn = document.getElementById("toggleBtn");
+    toggleBtn.textContent = "☰ Users";
+    toggleBtn.onclick = () => toggleSidebar();
+}
+if (window.innerWidth < 769) {
+    switchToBackButton();
+}
+function unreadmsg() {
+    fetch(`${window.location.origin}/vibeSoul/readHandler`)
+    .then(response => response.json())
+    .then(data => {
+        //  hide ALL badges temporarily
+        document.querySelectorAll('.unread-badge').forEach(badge => {
+            badge.style.display = 'none';
+        });
+        
+        // Update badges from server data
+        data.unread_messages.forEach(item => {
+            const friendElement = document.getElementById(`friend-${safeId(item.sender_name)}`);
+            if (friendElement) {
+                let badge = friendElement.querySelector('.unread-badge');
+                
+                if (!badge) {
+                    // Create new badge if it doesn't exist
+                    badge = document.createElement('span');
+                    badge.className = 'unread-badge';
+                    badge.style.background = 'red';
+                    badge.style.color = 'white';
+                    badge.style.borderRadius = '50%';
+                    badge.style.padding = '2px 6px';
+                    badge.style.marginLeft = '8px';
+                    badge.style.fontSize = '12px';
+                    badge.style.display = 'none';
+                    friendElement.appendChild(badge);
+                }
+                
+                // Update badge content and show if count > 0
+                if (item.unread_count > 0) {
+                    badge.textContent = item.unread_count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Error fetching unread counts:', error));
+}
 
 
+window.addEventListener("load", () => {
+    loadFriendList().then(() => {
+        unreadmsg(); 
+        setInterval(unreadmsg, 3000); // refresh every 3 seconds
+    });
+});
 
+function readmessage(){
+    fetch(`${window.location.origin}/vibeSoul/afterRead`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `sender=${encodeURIComponent(currentChatUser)}&receiver=${encodeURIComponent(username)}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            // Hide the badge for this user
+            const badge = document.querySelector(`#friend-${safeId(currentChatUser)} .unread-badge`);
+            if(badge) badge.style.display = 'none';
+            
+            unreadmsg();
+        }
+    })
+    .catch(err => console.error("Mark read error:", err));
+}

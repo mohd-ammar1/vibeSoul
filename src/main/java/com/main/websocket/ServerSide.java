@@ -42,7 +42,8 @@ public class ServerSide {
 		JSONObject obj = new JSONObject(message);
 		String receiver = obj.getString("to");
 		String rmessage = obj.getString("text");
-
+		
+		messageSaver(usernames.get(sender), receiver, rmessage);
 		JSONObject json = new JSONObject();
 		json.put("type", "message");
 		json.put("from", usernames.get(sender));
@@ -53,15 +54,24 @@ public class ServerSide {
 		for (Map.Entry<Session, String> entry : usernames.entrySet()) {
 			if (entry.getValue().equals(receiver) && entry.getKey().isOpen()) {
 				entry.getKey().getBasicRemote().sendText(json.toString());
-				messageSaver(usernames.get(sender), receiver, rmessage);
-			}
+				}
+		}
+		
+		ResultSet rs = dbhandler.selectData("select * from friendlist where user = ? and friend = ? ",usernames.get(sender),receiver);
+		if(!rs.next()) {
+			dboperation.addFriend(usernames.get(sender),receiver);
 		}
 	}
 
 	@OnClose
 	public void onClose(Session quitter) throws IOException {
 		String username = usernames.get(quitter);
-		dboperation.offline(quitter, username);
+		  if (username != null) {
+		        dboperation.offline(quitter, username);
+		    } else {
+		        System.out.println("Cannot remove online user: username is null for session " + quitter.getId());
+		        dboperation.offline(quitter, null); // optional fallback if needed
+		    }
 		sessions.remove(quitter);
 		usernames.remove(quitter);
 
@@ -115,5 +125,12 @@ public class ServerSide {
 			return (rreceiver.getInt("id"));
 		}
 		return 0;
+	}
+	protected String username(int id) throws SQLException{
+		ResultSet rs  = dbhandler.selectData("select username from users where id = ? ", id);
+		if(rs.next()) {
+			return(rs.getString("username"));
+		}
+		return null;
 	}
 }

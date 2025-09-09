@@ -12,12 +12,18 @@
     <name>vibeSoul Maven Webapp</name>
     <url>http://maven.apache.org</url>
 
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <!-- JUnit for Testing -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -60,10 +66,10 @@
 
         <!-- JSON library -->
         <dependency>
-		    <groupId>org.json</groupId>
-   			<artifactId>json</artifactId>
- 		   <version>20240303</version>
-		</dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
 
         <!-- Gson for JSON parsing -->
         <dependency>
@@ -83,6 +89,18 @@
     <build>
         <finalName>vibeSoul</finalName>
         <plugins>
+            <!-- Maven Compiler Plugin for Java 11 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+
             <!-- Maven WAR Plugin to properly package WAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,8 +118,6 @@
                 <version>2.2</version>
                 <configuration>
                     <path>/</path>
-                    <contextReloadable>true</contextReloadable>
-                    <reloadable>true</reloadable>
                     <update>true</update>
                 </configuration>
             </plugin>
